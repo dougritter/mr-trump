@@ -1,22 +1,22 @@
 package com.ritterdouglas.overlayslib.ui
 
 import android.content.Context
+import android.content.pm.PackageManager
 import android.graphics.Canvas
 import android.graphics.Color
 import android.graphics.drawable.Drawable
+import android.hardware.Camera
 import android.text.TextPaint
 import android.util.AttributeSet
+import android.util.Log
 import android.view.View
 import android.widget.FrameLayout
 
 import com.ritterdouglas.overlayslib.R
 
-/**
- * TODO: document your custom view class.
- */
 class LiveView : FrameLayout {
 
-    val TAG: String = LiveView::class.simpleName!!
+    companion object val TAG = LiveView::class.simpleName
 
     private var mExampleString: String = "LiveView"
     private var mExampleColor = Color.RED
@@ -48,6 +48,10 @@ class LiveView : FrameLayout {
         View.inflate(context, R.layout.live_view, this)
 
         cameraPreview = findViewById(R.id.cameraPreview) as FrameLayout?
+        var camera = checkAndInitCamera()
+
+        if (camera != null)
+            cameraPreview?.addView(CameraPreview(context, camera))
 
         val attributes = context.obtainStyledAttributes(
                 attrs, R.styleable.LiveView, defStyle, 0)
@@ -101,4 +105,33 @@ class LiveView : FrameLayout {
             mExampleDimension = exampleDimension
             invalidateTextPaintAndMeasurements()
         }
+
+    fun checkAndInitCamera(): Camera? {
+        if (checkCameraHardware(context))
+            return getCameraInstance()
+        else return null
+    }
+
+    fun checkCameraHardware(context: Context): Boolean {
+        if (context.getPackageManager().hasSystemFeature(PackageManager.FEATURE_CAMERA)) {
+            Log.d(TAG, "CAMERA HAS FEATURE")
+            return true
+        } else {
+            Log.e(TAG, "NO CAMERA ON THIS DEVICE")
+            return false
+        }
+    }
+
+    fun getCameraInstance(): Camera? {
+        var c: Camera? = null
+        try {
+            c = Camera.open()
+        } catch (e: Exception) {
+            Log.e(TAG, "CAMERA NOT AVAILABLE (in use or does not exist");
+        }
+
+        return c
+    }
+
+
 }
