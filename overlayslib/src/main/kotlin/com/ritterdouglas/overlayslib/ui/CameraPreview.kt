@@ -29,6 +29,7 @@ class CameraPreview(context: Context, private val mCamera: Camera) : SurfaceView
         try {
             mCamera.setPreviewDisplay(holder)
             mCamera.startPreview()
+            startDetectingFaces()
         } catch (e: IOException) {
             Log.d(TAG, "Error setting camera preview: " + e.message)
         }
@@ -36,7 +37,7 @@ class CameraPreview(context: Context, private val mCamera: Camera) : SurfaceView
     }
 
     override fun surfaceDestroyed(holder: SurfaceHolder) {
-        // empty. Take care of releasing the Camera preview in your activity.
+        mCamera.release()
     }
 
     override fun surfaceChanged(holder: SurfaceHolder, format: Int, w: Int, h: Int) {
@@ -62,9 +63,20 @@ class CameraPreview(context: Context, private val mCamera: Camera) : SurfaceView
         try {
             mCamera.setPreviewDisplay(mHolder)
             mCamera.startPreview()
+            startDetectingFaces()
 
         } catch (e: Exception) {
             Log.d(TAG, "Error starting camera preview: " + e.message)
+        }
+    }
+
+    fun startDetectingFaces() {
+        val params = mCamera.getParameters()
+
+        if (params.getMaxNumDetectedFaces() > 0) {
+            mCamera.startFaceDetection()
+        } else {
+            Log.e(TAG, "CAMERA DOESN'T SUPPORT FACE DETECTION :(")
         }
     }
 

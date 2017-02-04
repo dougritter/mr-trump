@@ -6,14 +6,16 @@ import android.os.Bundle
 import android.support.v4.content.ContextCompat
 import android.support.v4.app.ActivityCompat
 import android.content.pm.PackageManager
+import android.graphics.Bitmap
+import android.util.Log
 import android.view.View.GONE
 import android.widget.Button
 import android.widget.FrameLayout
 import android.widget.Toast
 import com.ritterdouglas.overlayslib.ui.LiveView
+import com.ritterdouglas.overlayslib.ui.OverlaysCallbacks
 
-class MainActivity : AppCompatActivity() {
-
+class MainActivity : AppCompatActivity(), OverlaysCallbacks {
     companion object {
         val TAG = MainActivity::class.simpleName
         val MY_PERMISSIONS_REQUEST_CAMERA = 100
@@ -31,19 +33,15 @@ class MainActivity : AppCompatActivity() {
     }
 
     fun handlePermissions() {
-
-        var array: Array<String> = arrayOf(Manifest.permission.CAMERA)
-
         if (ContextCompat.checkSelfPermission(this, Manifest.permission.CAMERA) != PackageManager.PERMISSION_GRANTED) {
-            ActivityCompat.requestPermissions(this, array, MY_PERMISSIONS_REQUEST_CAMERA)
+            ActivityCompat.requestPermissions(this, arrayOf(Manifest.permission.CAMERA), MY_PERMISSIONS_REQUEST_CAMERA)
         } else {
-            uiLibComponent?.addView(LiveView(this))
+            uiLibComponent?.addView(LiveView(this, this))
             startLibButton?.visibility = GONE
         }
     }
 
-    override fun onRequestPermissionsResult(requestCode: Int,
-                                            permissions: Array<String>, grantResults: IntArray) {
+    override fun onRequestPermissionsResult(requestCode: Int, permissions: Array<String>, grantResults: IntArray) {
         when (requestCode) {
             MY_PERMISSIONS_REQUEST_CAMERA -> {
                 if (grantResults.isNotEmpty() && grantResults[0] == PackageManager.PERMISSION_GRANTED) {
@@ -56,6 +54,14 @@ class MainActivity : AppCompatActivity() {
         }
     }
 
+    override fun onError(error: String) {
+        Log.e(TAG, error)
+        Toast.makeText(this, error, Toast.LENGTH_SHORT).show()
+
+    }
+
+    override fun onImageResult(image: Bitmap) {
+    }
 
 
 }
