@@ -29,6 +29,7 @@ class FaceOverlay : View{
 
     var imageResourceId: Int? = null
     var isCurrentlyVisible: Boolean = false
+    var isCurrentlySelected: Boolean = false
 
     constructor(context: Context) : super(context) { init() }
 
@@ -69,62 +70,61 @@ class FaceOverlay : View{
     }
 
     override fun onTouchEvent(ev: MotionEvent): Boolean {
-        if (isCurrentlyVisible) {
+        if (isCurrentlySelected) {
+            mScaleDetector!!.onTouchEvent(ev)
 
-        mScaleDetector!!.onTouchEvent(ev)
+            val action = ev.getAction()
+            when (action and MotionEvent.ACTION_MASK) {
+                MotionEvent.ACTION_DOWN -> {
+                    val x = ev.getX()
+                    val y = ev.getY()
 
-        val action = ev.getAction()
-        when (action and MotionEvent.ACTION_MASK) {
-            MotionEvent.ACTION_DOWN -> {
-                val x = ev.getX()
-                val y = ev.getY()
-
-                mLastTouchX = x
-                mLastTouchY = y
-                mActivePointerId = ev.getPointerId(0)
-            }
-
-            MotionEvent.ACTION_MOVE -> {
-                val pointerIndex = ev.findPointerIndex(mActivePointerId)
-                val x = ev.getX(pointerIndex)
-                val y = ev.getY(pointerIndex)
-
-                // Only move if the ScaleGestureDetector isn't processing a gesture.
-                if (!mScaleDetector!!.isInProgress()) {
-                    val dx = x - mLastTouchX
-                    val dy = y - mLastTouchY
-
-                    mPosX += dx
-                    mPosY += dy
-
-                    invalidate()
+                    mLastTouchX = x
+                    mLastTouchY = y
+                    mActivePointerId = ev.getPointerId(0)
                 }
 
-                mLastTouchX = x
-                mLastTouchY = y
-            }
+                MotionEvent.ACTION_MOVE -> {
+                    val pointerIndex = ev.findPointerIndex(mActivePointerId)
+                    val x = ev.getX(pointerIndex)
+                    val y = ev.getY(pointerIndex)
 
-            MotionEvent.ACTION_UP -> {
-                mActivePointerId = INVALID_POINTER_ID
-            }
+                    // Only move if the ScaleGestureDetector isn't processing a gesture.
+                    if (!mScaleDetector!!.isInProgress()) {
+                        val dx = x - mLastTouchX
+                        val dy = y - mLastTouchY
 
-            MotionEvent.ACTION_CANCEL -> {
-                mActivePointerId = INVALID_POINTER_ID
-            }
+                        mPosX += dx
+                        mPosY += dy
 
-            MotionEvent.ACTION_POINTER_UP -> {
-                val pointerIndex = ev.getAction() and MotionEvent.ACTION_POINTER_INDEX_MASK shr MotionEvent.ACTION_POINTER_INDEX_SHIFT
-                val pointerId = ev.getPointerId(pointerIndex)
-                if (pointerId == mActivePointerId) {
-                    // This was our active pointer going up. Choose a new
-                    // active pointer and adjust accordingly.
-                    val newPointerIndex = if (pointerIndex == 0) 1 else 0
-                    mLastTouchX = ev.getX(newPointerIndex)
-                    mLastTouchY = ev.getY(newPointerIndex)
-                    mActivePointerId = ev.getPointerId(newPointerIndex)
+                        invalidate()
+                    }
+
+                    mLastTouchX = x
+                    mLastTouchY = y
+                }
+
+                MotionEvent.ACTION_UP -> {
+                    mActivePointerId = INVALID_POINTER_ID
+                }
+
+                MotionEvent.ACTION_CANCEL -> {
+                    mActivePointerId = INVALID_POINTER_ID
+                }
+
+                MotionEvent.ACTION_POINTER_UP -> {
+                    val pointerIndex = ev.getAction() and MotionEvent.ACTION_POINTER_INDEX_MASK shr MotionEvent.ACTION_POINTER_INDEX_SHIFT
+                    val pointerId = ev.getPointerId(pointerIndex)
+                    if (pointerId == mActivePointerId) {
+                        // This was our active pointer going up. Choose a new
+                        // active pointer and adjust accordingly.
+                        val newPointerIndex = if (pointerIndex == 0) 1 else 0
+                        mLastTouchX = ev.getX(newPointerIndex)
+                        mLastTouchY = ev.getY(newPointerIndex)
+                        mActivePointerId = ev.getPointerId(newPointerIndex)
+                    }
                 }
             }
-        }
             return true
         } else return super.onTouchEvent(ev)
     }

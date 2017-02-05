@@ -1,3 +1,5 @@
 <resources>
     <string name="app_name">Overlays</string>
+    <string name="start_lib_description">To start the lib, press the button below. \nWhen a face is recognized, \nthe controls are allowed. \n\nEnjoy :)</string>
+    <string name="start_button">LET\'S GO</string>
 </resources>

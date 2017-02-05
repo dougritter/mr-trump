@@ -23,6 +23,7 @@ class OverlayOptionView : RelativeLayout {
 
     var image: ImageView? = null
     var title: TextView? = null
+    var highlight: View? = null
     var resourceId: Int? = null
     var titleText: String? = null
 
@@ -43,6 +44,7 @@ class OverlayOptionView : RelativeLayout {
 
         image = findViewById(R.id.image) as ImageView
         title = findViewById(R.id.title) as TextView
+        highlight = findViewById(R.id.highlightView) as View
 
         image?.setImageResource(resourceId!!)
         if (titleText != null) title?.text = titleText
@@ -52,4 +54,6 @@ class OverlayOptionView : RelativeLayout {
     override fun onDraw(canvas: Canvas) {
         super.onDraw(canvas)
     }
+
+    fun highlightView(highlight: Boolean) = if (highlight) this.highlight?.visibility = VISIBLE else this.highlight?.visibility = View.GONE
 }

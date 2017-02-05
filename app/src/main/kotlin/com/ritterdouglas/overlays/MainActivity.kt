@@ -27,6 +27,7 @@ class MainActivity : AppCompatActivity(), OverlaysCallbacks {
     val takePictureButton by lazy { findViewById(R.id.takePictureButton) as FloatingActionButton? }
     val resultContainer by lazy { findViewById(R.id.resultContainer) as RelativeLayout? }
     val resultImage by lazy { findViewById(R.id.resultImage) as ImageView? }
+    val description by lazy { findViewById(R.id.description) as TextView? }
     val optionsContainer by lazy { findViewById(R.id.overlayButtonsContainer) as LinearLayout? }
 
     var liveView: LiveView? = null
@@ -43,18 +44,22 @@ class MainActivity : AppCompatActivity(), OverlaysCallbacks {
     fun handlePermissions() {
         if (ContextCompat.checkSelfPermission(this, Manifest.permission.CAMERA) != PackageManager.PERMISSION_GRANTED) {
             ActivityCompat.requestPermissions(this, arrayOf(Manifest.permission.CAMERA), MY_PERMISSIONS_REQUEST_CAMERA)
-        } else {
-            liveView = LiveView(this, this)
-            uiLibComponent?.addView(liveView)
-            startLibButton?.visibility = GONE
-            takePictureButton?.visibility = VISIBLE
-            setupOptionButtons()
-        }
+        } else startLib()
+
     }
+
+    fun startLib() {
+        liveView = LiveView(this, this)
+        uiLibComponent?.addView(liveView)
+        startLibButton?.visibility = GONE
+        description?.visibility = GONE
+        setupOptionButtons()
+    }
+
 
     fun setupOptionButtons() {
         for ((index, value) in liveView?.getImageChoices()!!.withIndex()) {
-            var view = OverlayOptionView(this, value, null)
+            val view = OverlayOptionView(this, value, null)
             view.setOnClickListener { handleOptionClick(index) }
             optionsContainer?.addView(view)
         }
@@ -63,6 +68,10 @@ class MainActivity : AppCompatActivity(), OverlaysCallbacks {
     fun handleOptionClick(position: Int) {
         Log.e(TAG, "position clicked: "+ position)
         liveView?.changedOptionPosition(liveView!!.getOverlayPosition(position))
+        for (item in 0..optionsContainer?.childCount!!-1) {
+            val view = optionsContainer?.getChildAt(item) as OverlayOptionView
+            if (position == item) view.highlightView(true) else view.highlightView(false)
+        }
     }
 
 
@@ -71,9 +80,7 @@ class MainActivity : AppCompatActivity(), OverlaysCallbacks {
             MY_PERMISSIONS_REQUEST_CAMERA -> {
                 if (grantResults.isNotEmpty() && grantResults[0] == PackageManager.PERMISSION_GRANTED) {
                     handlePermissions()
-                } else {
-                    Toast.makeText(this, "We didn't receive the permission", Toast.LENGTH_SHORT).show()
-                }
+                } else Toast.makeText(this, "We didn't receive the permission", Toast.LENGTH_SHORT).show()
                 return
             }
         }
@@ -94,6 +101,7 @@ class MainActivity : AppCompatActivity(), OverlaysCallbacks {
 
     override fun faceRecognized() {
         optionsContainer?.visibility = VISIBLE
+        takePictureButton?.visibility = VISIBLE
     }
 
 

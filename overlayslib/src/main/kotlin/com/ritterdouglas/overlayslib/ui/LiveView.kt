@@ -15,7 +15,10 @@ import android.graphics.*
 
 class LiveView : FrameLayout, Camera.FaceDetectionListener {
 
-    companion object val TAG = LiveView::class.simpleName
+    companion object {
+        val TAG = LiveView::class.simpleName
+        val NUMBER_OF_CHILDS_BEFORE_OVERLAYS = 2
+    }
 
     var mCamera: Camera? = null
     var cameraPreview: FrameLayout? = null
@@ -53,23 +56,24 @@ class LiveView : FrameLayout, Camera.FaceDetectionListener {
     }
 
     fun createOverlays() {
-        if (cameraPreview?.childCount!! < 3) {
+        if (cameraPreview?.childCount!! < NUMBER_OF_CHILDS_BEFORE_OVERLAYS + 1) {
             Log.e(TAG, "CREATE OVERLAYS !!!!!!!!!!!!")
             getImageChoices()
                     .map { FaceOverlay(context, it) }
                     .forEach { cameraPreview?.addView(it) }
         }
-
     }
 
     override fun onDraw(canvas: Canvas) { super.onDraw(canvas) }
 
     fun changedOptionPosition(position: Int) {
-        Log.e(TAG, "changedOptionPosition")
-
-        var child = cameraPreview?.getChildAt(position) as FaceOverlay?
-        child?.setCurrent(true)
-
+        for (item in NUMBER_OF_CHILDS_BEFORE_OVERLAYS..cameraPreview!!.childCount-1) {
+            val child = cameraPreview?.getChildAt(item) as FaceOverlay?
+            if (item == position) {
+                child?.setCurrent(true)
+            }
+            child?.isCurrentlySelected = item == position
+        }
     }
 
     fun checkAndInitCamera(): Camera? {
@@ -174,7 +178,7 @@ class LiveView : FrameLayout, Camera.FaceDetectionListener {
         listener?.onImageResult(bitmap)
     }
 
-    fun getImageChoices() = arrayOf(R.drawable.trump_hair, R.drawable.trump_face, R.drawable.trump_hand)
+    fun getImageChoices() = arrayOf(R.drawable.trump_face, R.drawable.trump_hair, R.drawable.trump_hand)
 
     fun getOverlayPosition(position: Int) = position + 2
 

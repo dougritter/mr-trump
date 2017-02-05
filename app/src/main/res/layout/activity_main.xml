@@ -11,12 +11,21 @@
         android:layout_height="match_parent">
     </FrameLayout>
 
+    <TextView
+        android:id="@+id/description"
+        android:text="@string/start_lib_description"
+        android:textSize="18sp"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:layout_margin="15dp"/>
+
     <Button
         android:id="@+id/startLibButton"
         android:layout_width="match_parent"
         android:layout_height="50dp"
         android:layout_margin="15dp"
-        android:text="LET'S GO"/>
+        android:layout_below="@id/description"
+        android:text="@string/start_button"/>
 
     <android.support.design.widget.FloatingActionButton
         android:id="@+id/takePictureButton"
@@ -34,24 +43,32 @@
         android:layout_width="match_parent"
         android:layout_height="match_parent"
         android:visibility="gone"
-        android:padding="15dp"
         android:background="#aaa">
 
         <ImageView
             android:id="@+id/resultImage"
+            android:scaleType="centerCrop"
             android:layout_width="match_parent"
             android:layout_height="match_parent" />
     </RelativeLayout>
 
-    <LinearLayout
-        android:id="@+id/overlayButtonsContainer"
-        android:visibility="gone"
-        android:layout_width="match_parent"
-        android:layout_height="120dp"
+    <HorizontalScrollView
         android:layout_alignParentBottom="true"
-        android:orientation="horizontal">
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content">
 
-    </LinearLayout>
+        <LinearLayout
+            android:id="@+id/overlayButtonsContainer"
+            android:visibility="gone"
+            android:layout_width="match_parent"
+            android:layout_height="120dp"
+            android:gravity="fill_horizontal"
+            android:orientation="horizontal">
+
+        </LinearLayout>
+
+    </HorizontalScrollView>
+
 
 
 </RelativeLayout>
