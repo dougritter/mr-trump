@@ -40,8 +40,16 @@
             android:id="@+id/resultImage"
             android:layout_width="match_parent"
             android:layout_height="match_parent" />
-
     </RelativeLayout>
+
+    <LinearLayout
+        android:id="@+id/overlayButtonsContainer"
+        android:layout_width="match_parent"
+        android:layout_height="120dp"
+        android:layout_alignParentBottom="true"
+        android:orientation="horizontal">
+
+    </LinearLayout>
 
 
 </RelativeLayout>

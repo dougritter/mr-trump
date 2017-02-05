@@ -23,6 +23,9 @@ class LiveView : FrameLayout, Camera.FaceDetectionListener {
     var anOverlay: FaceOverlay? = null
     var resultImage: ImageView? = null
 
+    var currentOverlay: Int? = 2
+    var atLeastOneFaceRecognized = false
+
     constructor(context: Context, listener: OverlaysCallbacks) : super(context) {
         init(context, null, 0)
         this.listener = listener
@@ -44,14 +47,28 @@ class LiveView : FrameLayout, Camera.FaceDetectionListener {
         if (camera != null) {
             cameraPreview?.addView(CameraPreview(context, camera))
             cameraPreview?.addView(resultImage)
+            createOverlays()
         } else listener?.onError("We've had a problem with camera :(")
 
-        val attributes = context.obtainStyledAttributes(
-                attrs, R.styleable.LiveView, defStyle, 0)
+    }
+
+    fun createOverlays() {
+        if (cameraPreview?.childCount!! < 3)
+            getImageChoices()
+                    .map { FaceOverlay(context, it) }
+                    .forEach { cameraPreview?.addView(it) }
 
     }
 
     override fun onDraw(canvas: Canvas) { super.onDraw(canvas) }
+
+    fun changedOptionPosition(position: Int) {
+        Log.e(TAG, "changedOptionPosition")
+
+        var child = cameraPreview?.getChildAt(position) as FaceOverlay?
+        child?.setCurrent(true)
+
+    }
 
     fun checkAndInitCamera(): Camera? {
         if (checkCameraHardware(context))
@@ -92,19 +109,19 @@ class LiveView : FrameLayout, Camera.FaceDetectionListener {
     }
 
     override fun onFaceDetection(faces: Array<out Camera.Face>?, camera: Camera?) {
-        if (faces!!.isNotEmpty()){
+        if (faces!!.isNotEmpty()) {
             Log.d("FaceDetection", "face detected: "+ faces.size
                     + " Face 1 Location X: " + faces[0].rect.centerX() +
                     "Y: " + faces[0].rect.centerY() + faces[0].rect.toString() + " bottom: "+faces[0].rect.bottom)
 
-            if (anOverlay == null) {
-                anOverlay = FaceOverlay(context)
-                cameraPreview?.addView(anOverlay)
-            }
+            atLeastOneFaceRecognized = true
+            createOverlays()
 
-            if (!anOverlay!!.atLeastOneFaceRecognized) {
+
+            /*if (!anOverlay!!.atLeastOneFaceRecognized) {
                 anOverlay!!.setFaceRecognized()
-            }
+
+            }*/
 
         }
     }
@@ -159,5 +176,9 @@ class LiveView : FrameLayout, Camera.FaceDetectionListener {
 
         listener?.onImageResult(bitmap)
     }
+
+    fun getImageChoices() = arrayOf(R.drawable.trump_hair, R.drawable.trump_face, R.drawable.trump_hand)
+
+    fun getOverlayPosition(position: Int) = position + 2
 
 }

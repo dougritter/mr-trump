@@ -13,6 +13,7 @@ import android.view.View.GONE
 import android.view.View.VISIBLE
 import android.widget.*
 import com.ritterdouglas.overlayslib.ui.LiveView
+import com.ritterdouglas.overlayslib.ui.OverlayOptionView
 import com.ritterdouglas.overlayslib.ui.OverlaysCallbacks
 
 class MainActivity : AppCompatActivity(), OverlaysCallbacks {
@@ -26,6 +27,7 @@ class MainActivity : AppCompatActivity(), OverlaysCallbacks {
     val takePictureButton by lazy { findViewById(R.id.takePictureButton) as FloatingActionButton? }
     val resultContainer by lazy { findViewById(R.id.resultContainer) as RelativeLayout? }
     val resultImage by lazy { findViewById(R.id.resultImage) as ImageView? }
+    val optionsContainer by lazy { findViewById(R.id.overlayButtonsContainer) as LinearLayout? }
 
     var liveView: LiveView? = null
 
@@ -46,8 +48,23 @@ class MainActivity : AppCompatActivity(), OverlaysCallbacks {
             uiLibComponent?.addView(liveView)
             startLibButton?.visibility = GONE
             takePictureButton?.visibility = VISIBLE
+            setupOptionButtons()
         }
     }
+
+    fun setupOptionButtons() {
+        for ((index, value) in liveView?.getImageChoices()!!.withIndex()) {
+            var view = OverlayOptionView(this, value, null)
+            view.setOnClickListener { handleOptionClick(index) }
+            optionsContainer?.addView(view)
+        }
+    }
+
+    fun handleOptionClick(position: Int) {
+        Log.e(TAG, "position clicked: "+ position)
+        liveView?.changedOptionPosition(liveView!!.getOverlayPosition(position))
+    }
+
 
     override fun onRequestPermissionsResult(requestCode: Int, permissions: Array<String>, grantResults: IntArray) {
         when (requestCode) {

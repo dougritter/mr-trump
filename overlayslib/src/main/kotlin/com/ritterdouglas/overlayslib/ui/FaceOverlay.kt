@@ -6,22 +6,17 @@ import android.util.AttributeSet
 import android.util.Log
 import android.view.View
 
-import com.ritterdouglas.overlayslib.R
 import android.support.v4.content.res.ResourcesCompat
 import android.view.MotionEvent
 import android.view.MotionEvent.INVALID_POINTER_ID
 import android.view.ScaleGestureDetector
 import android.graphics.drawable.Drawable
-import android.widget.ImageView
-
 
 class FaceOverlay : View{
 
     companion object { val TAG = FaceOverlay::class.simpleName }
 
-    val paint = Paint()
     var mImage: Drawable? = null
-    var rect: Rect? = null
     var mActivePointerId = INVALID_POINTER_ID
     var mScaleDetector: ScaleGestureDetector? = null
 
@@ -33,30 +28,33 @@ class FaceOverlay : View{
     var mScaleFactor = 1f
     var atLeastOneFaceRecognized: Boolean = false
 
-    constructor(context: Context) : super(context) { init(null, 0) }
+    var imageResourceId: Int? = null
+    var isCurrentlyVisible: Boolean = false
 
-    constructor(context: Context, attrs: AttributeSet) : super(context, attrs) { init(attrs, 0) }
+    constructor(context: Context) : super(context) { init() }
 
-    constructor(context: Context, attrs: AttributeSet, defStyle: Int) : super(context, attrs, defStyle) { init(attrs, defStyle) }
+    constructor(context: Context, resourceId: Int) : super(context) {
+        this.imageResourceId = resourceId
+        init()
+    }
 
-    private fun init(attrs: AttributeSet?, defStyle: Int) {
+    constructor(context: Context, attrs: AttributeSet) : super(context, attrs) { init() }
+
+    constructor(context: Context, attrs: AttributeSet, defStyle: Int) : super(context, attrs, defStyle) { init() }
+
+    private fun init() {
         mScaleDetector = ScaleGestureDetector(context, ScaleListener())
         setupImageInitialState()
     }
 
-    fun setFaceRecognized() {
-        atLeastOneFaceRecognized = true
-        invalidate()
-    }
-
     fun setupImageInitialState() {
-        mImage = ResourcesCompat.getDrawable(resources, R.drawable.trump_hair, null)
+        mImage = ResourcesCompat.getDrawable(resources, imageResourceId!!, null)
         mImage!!.setBounds(0, 0, mImage!!.intrinsicWidth/2, mImage!!.intrinsicHeight/2)
     }
 
     override fun onDraw(canvas: Canvas) {
         super.onDraw(canvas)
-        if (atLeastOneFaceRecognized) {
+        if (isCurrentlyVisible) {
             canvas.save()
             Log.d("DEBUG", "X: "+mPosX+" Y: "+mPosY)
             canvas.translate(mPosX, mPosY)
@@ -64,8 +62,11 @@ class FaceOverlay : View{
             mImage!!.draw(canvas)
             canvas.restore()
         }
+    }
 
-
+    fun setCurrent(current: Boolean) {
+        this.isCurrentlyVisible = current
+        invalidate()
     }
 
     override fun onTouchEvent(ev: MotionEvent): Boolean {
