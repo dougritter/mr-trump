@@ -85,34 +85,7 @@ class LiveView : FrameLayout, Camera.FaceDetectionListener {
 
         val contentWidth = width - paddingLeft - paddingRight
         val contentHeight = height - paddingTop - paddingBottom
-
-        /*// Draw the text.
-        canvas.drawText(mExampleString!!,
-                paddingLeft + (contentWidth - mTextWidth) / 2,
-                paddingTop + (contentHeight + mTextHeight) / 2,
-                mTextPaint!!)
-
-        // Draw the example drawable on top of the text.
-        if (exampleDrawable != null) {
-            exampleDrawable!!.setBounds(paddingLeft, paddingTop,
-                    paddingLeft + contentWidth, paddingTop + contentHeight)
-            exampleDrawable!!.draw(canvas)
-        }*/
     }
-
-    var exampleColor: Int
-        get() = mExampleColor
-        set(exampleColor) {
-            mExampleColor = exampleColor
-            invalidateTextPaintAndMeasurements()
-        }
-
-    var exampleDimension: Float
-        get() = mExampleDimension
-        set(exampleDimension) {
-            mExampleDimension = exampleDimension
-            invalidateTextPaintAndMeasurements()
-        }
 
     fun checkAndInitCamera(): Camera? {
         if (checkCameraHardware(context))
@@ -155,16 +128,19 @@ class LiveView : FrameLayout, Camera.FaceDetectionListener {
 
     override fun onFaceDetection(faces: Array<out Camera.Face>?, camera: Camera?) {
         if (faces!!.isNotEmpty()){
-            Log.e("FaceDetection", "face detected: "+ faces.size
+            Log.d("FaceDetection", "face detected: "+ faces.size
                     + " Face 1 Location X: " + faces[0].rect.centerX() +
-                    "Y: " + faces[0].rect.centerY() + faces[0].rect.toString())
+                    "Y: " + faces[0].rect.centerY() + faces[0].rect.toString() + " bottom: "+faces[0].rect.bottom)
 
             if (anOverlay == null) {
                 anOverlay = FaceOverlay(context)
                 cameraPreview?.addView(anOverlay)
             }
 
-            anOverlay?.rectChanged(faces[0].rect)
+            if (!anOverlay!!.atLeastOneFaceRecognized) {
+                anOverlay!!.setFaceRecognized()
+            }
+
         }
     }
 
