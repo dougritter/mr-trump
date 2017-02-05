@@ -86,10 +86,15 @@ class MainActivity : AppCompatActivity(), OverlaysCallbacks {
     }
 
     override fun onImageResult(image: Bitmap) {
-        //TODO stop camera to release resources
         takePictureButton?.visibility = GONE
         resultContainer?.visibility = VISIBLE
         resultImage?.setImageBitmap(image)
+        optionsContainer?.visibility = GONE
     }
+
+    override fun faceRecognized() {
+        optionsContainer?.visibility = VISIBLE
+    }
+
 
 }

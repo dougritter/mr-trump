@@ -5,5 +5,6 @@ import android.graphics.Bitmap
 interface OverlaysCallbacks {
     fun onError(error: String)
     fun onImageResult(image: Bitmap)
+    fun faceRecognized()
 
 }

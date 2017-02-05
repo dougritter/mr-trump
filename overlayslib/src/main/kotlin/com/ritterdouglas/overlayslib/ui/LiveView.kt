@@ -53,10 +53,12 @@ class LiveView : FrameLayout, Camera.FaceDetectionListener {
     }
 
     fun createOverlays() {
-        if (cameraPreview?.childCount!! < 3)
+        if (cameraPreview?.childCount!! < 3) {
+            Log.e(TAG, "CREATE OVERLAYS !!!!!!!!!!!!")
             getImageChoices()
                     .map { FaceOverlay(context, it) }
                     .forEach { cameraPreview?.addView(it) }
+        }
 
     }
 
@@ -116,13 +118,7 @@ class LiveView : FrameLayout, Camera.FaceDetectionListener {
 
             atLeastOneFaceRecognized = true
             createOverlays()
-
-
-            /*if (!anOverlay!!.atLeastOneFaceRecognized) {
-                anOverlay!!.setFaceRecognized()
-
-            }*/
-
+            listener?.faceRecognized()
         }
     }
 
@@ -167,6 +163,7 @@ class LiveView : FrameLayout, Camera.FaceDetectionListener {
 
     val mPicture = Camera.PictureCallback { data, camera ->
         mCamera?.stopPreview()
+        mCamera?.release()
         val bMap = BitmapFactory.decodeByteArray(data, 0, data.size)
         resultImage?.setImageBitmap(BitmapUtils.rotateImage(bMap, -90f))
 

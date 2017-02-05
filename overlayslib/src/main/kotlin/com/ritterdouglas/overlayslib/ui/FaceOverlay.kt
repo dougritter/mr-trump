@@ -26,7 +26,6 @@ class FaceOverlay : View{
     var mLastTouchY: Float = 0f
 
     var mScaleFactor = 1f
-    var atLeastOneFaceRecognized: Boolean = false
 
     var imageResourceId: Int? = null
     var isCurrentlyVisible: Boolean = false
@@ -70,6 +69,8 @@ class FaceOverlay : View{
     }
 
     override fun onTouchEvent(ev: MotionEvent): Boolean {
+        if (isCurrentlyVisible) {
+
         mScaleDetector!!.onTouchEvent(ev)
 
         val action = ev.getAction()
@@ -124,8 +125,8 @@ class FaceOverlay : View{
                 }
             }
         }
-
-        return true
+            return true
+        } else return super.onTouchEvent(ev)
     }
 
 

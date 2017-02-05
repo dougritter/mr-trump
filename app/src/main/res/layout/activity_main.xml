@@ -25,7 +25,8 @@
         android:visibility="gone"
         android:layout_alignParentBottom="true"
         android:layout_alignParentRight="true"
-        android:layout_margin="25dp"
+        android:layout_marginRight="25dp"
+        android:layout_marginBottom="140dp"
         android:src="@android:drawable/ic_menu_camera"/>
 
     <RelativeLayout
@@ -44,6 +45,7 @@
 
     <LinearLayout
         android:id="@+id/overlayButtonsContainer"
+        android:visibility="gone"
         android:layout_width="match_parent"
         android:layout_height="120dp"
         android:layout_alignParentBottom="true"
