@@ -1,6 +1,5 @@
 <?xml version="1.0" encoding="utf-8"?>
 <RelativeLayout xmlns:android="http://schemas.android.com/apk/res/android"
-    xmlns:app="http://schemas.android.com/apk/res-auto"
     xmlns:tools="http://schemas.android.com/tools"
     android:layout_width="match_parent"
     android:layout_height="match_parent"
@@ -19,18 +18,30 @@
         android:layout_margin="15dp"
         android:text="LET'S GO"/>
 
-    <!--<com.ritterdouglas.overlayslib.ui.LiveView
+    <android.support.design.widget.FloatingActionButton
+        android:id="@+id/takePictureButton"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:visibility="gone"
+        android:layout_alignParentBottom="true"
+        android:layout_alignParentRight="true"
+        android:layout_margin="25dp"
+        android:src="@android:drawable/ic_menu_camera"/>
+
+    <RelativeLayout
+        android:id="@+id/resultContainer"
         android:layout_width="match_parent"
         android:layout_height="match_parent"
-        android:background="#ccc"
-        android:paddingBottom="40dp"
-        android:paddingLeft="20dp"
-        app:exampleColor="#33b5e5"
-        app:exampleDimension="24sp"
-        app:exampleDrawable="@android:drawable/ic_menu_add"
-        app:exampleString="Hello, LiveView"
-        tools:layout_editor_absoluteY="8dp"
-        tools:layout_editor_absoluteX="8dp" />-->
+        android:visibility="gone"
+        android:padding="15dp"
+        android:background="#aaa">
+
+        <ImageView
+            android:id="@+id/resultImage"
+            android:layout_width="match_parent"
+            android:layout_height="match_parent" />
+
+    </RelativeLayout>
 
 
 </RelativeLayout>

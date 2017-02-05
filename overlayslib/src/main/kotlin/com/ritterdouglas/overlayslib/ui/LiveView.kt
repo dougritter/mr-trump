@@ -2,43 +2,26 @@ package com.ritterdouglas.overlayslib.ui
 
 import android.content.Context
 import android.content.pm.PackageManager
-import android.content.res.Configuration
-import android.graphics.Canvas
-import android.graphics.Color
-import android.graphics.drawable.Drawable
 import android.hardware.Camera
-import android.text.TextPaint
 import android.util.AttributeSet
 import android.util.Log
 import android.view.View
 import android.widget.FrameLayout
 
 import com.ritterdouglas.overlayslib.R
-import android.opengl.ETC1.getHeight
-import android.opengl.ETC1.getWidth
-import android.widget.LinearLayout
-import android.view.ViewTreeObserver
-
+import android.widget.ImageView
+import android.graphics.*
 
 
 class LiveView : FrameLayout, Camera.FaceDetectionListener {
 
-
     companion object val TAG = LiveView::class.simpleName
 
-    private var mExampleString: String = "LiveView"
-    private var mExampleColor = Color.RED
-    private var mExampleDimension = 0f
-
-    var exampleDrawable: Drawable? = null
-
-    private var mTextPaint: TextPaint? = null
-    private var mTextWidth: Float = 0.toFloat()
-    private var mTextHeight: Float = 0.toFloat()
-
+    var mCamera: Camera? = null
     var cameraPreview: FrameLayout? = null
     var listener: OverlaysCallbacks? = null
     var anOverlay: FaceOverlay? = null
+    var resultImage: ImageView? = null
 
     constructor(context: Context, listener: OverlaysCallbacks) : super(context) {
         init(context, null, 0)
@@ -56,36 +39,19 @@ class LiveView : FrameLayout, Camera.FaceDetectionListener {
 
         cameraPreview = findViewById(R.id.cameraPreview) as FrameLayout?
         var camera = checkAndInitCamera()
+        resultImage = ImageView(context)
 
-        if (camera != null)
+        if (camera != null) {
             cameraPreview?.addView(CameraPreview(context, camera))
-        else listener?.onError("We've had a problem with camera :(")
+            cameraPreview?.addView(resultImage)
+        } else listener?.onError("We've had a problem with camera :(")
 
         val attributes = context.obtainStyledAttributes(
                 attrs, R.styleable.LiveView, defStyle, 0)
 
     }
 
-    private fun invalidateTextPaintAndMeasurements() {
-        mTextPaint!!.textSize = mExampleDimension
-        mTextPaint!!.color = mExampleColor
-        mTextWidth = mTextPaint!!.measureText(mExampleString)
-
-        val fontMetrics = mTextPaint!!.fontMetrics
-        mTextHeight = fontMetrics.bottom
-    }
-
-    override fun onDraw(canvas: Canvas) {
-        super.onDraw(canvas)
-
-        val paddingLeft = paddingLeft
-        val paddingTop = paddingTop
-        val paddingRight = paddingRight
-        val paddingBottom = paddingBottom
-
-        val contentWidth = width - paddingLeft - paddingRight
-        val contentHeight = height - paddingTop - paddingBottom
-    }
+    override fun onDraw(canvas: Canvas) { super.onDraw(canvas) }
 
     fun checkAndInitCamera(): Camera? {
         if (checkCameraHardware(context))
@@ -104,25 +70,24 @@ class LiveView : FrameLayout, Camera.FaceDetectionListener {
     }
 
     fun getCameraInstance(): Camera? {
-        var c: Camera? = null
         try {
-            c = if (Camera.getNumberOfCameras() > 1) Camera.open(1) else Camera.open()
-            setupCamera(c)
+            mCamera = if (Camera.getNumberOfCameras() > 1) Camera.open(1) else Camera.open()
+            setupCamera()
         } catch (e: Exception) {
             Log.e(TAG, "CAMERA NOT AVAILABLE (in use or does not exist)")
         }
 
-        return c
+        return mCamera
     }
 
-    fun setupCamera(camera: Camera) {
-        camera.setDisplayOrientation(90)
-        camera.setFaceDetectionListener(this)
+    fun setupCamera() {
+        mCamera?.setDisplayOrientation(90)
+        mCamera?.setFaceDetectionListener(this)
 
-        val sizes = camera.parameters.getSupportedPreviewSizes()
+        val sizes = mCamera?.parameters?.supportedPreviewSizes
         val optimalSize = getOptimalPreviewSize(sizes, resources.displayMetrics.widthPixels, resources.displayMetrics.heightPixels)
 
-        camera.parameters.setPreviewSize(optimalSize!!.height, optimalSize.height)
+        mCamera?.parameters?.setPreviewSize(optimalSize!!.height, optimalSize.height)
 
     }
 
@@ -176,6 +141,23 @@ class LiveView : FrameLayout, Camera.FaceDetectionListener {
         Log.e(TAG, "optimal size: width: " + optimalSize?.width+ " height: "+optimalSize?.height)
 
         return optimalSize
+
+    }
+
+    fun takePicture() {
+        mCamera?.takePicture(null, null, mPicture)
+    }
+
+    val mPicture = Camera.PictureCallback { data, camera ->
+        mCamera?.stopPreview()
+        val bMap = BitmapFactory.decodeByteArray(data, 0, data.size)
+        resultImage?.setImageBitmap(BitmapUtils.rotateImage(bMap, -90f))
+
+        val bitmap = Bitmap.createBitmap(width, height, Bitmap.Config.ARGB_8888)
+        val canvas = Canvas(bitmap)
+        cameraPreview?.draw(canvas)
+
+        listener?.onImageResult(bitmap)
     }
 
 }

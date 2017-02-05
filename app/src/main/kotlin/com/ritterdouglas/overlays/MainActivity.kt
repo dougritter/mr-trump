@@ -7,11 +7,11 @@ import android.support.v4.content.ContextCompat
 import android.support.v4.app.ActivityCompat
 import android.content.pm.PackageManager
 import android.graphics.Bitmap
+import android.support.design.widget.FloatingActionButton
 import android.util.Log
 import android.view.View.GONE
-import android.widget.Button
-import android.widget.FrameLayout
-import android.widget.Toast
+import android.view.View.VISIBLE
+import android.widget.*
 import com.ritterdouglas.overlayslib.ui.LiveView
 import com.ritterdouglas.overlayslib.ui.OverlaysCallbacks
 
@@ -23,12 +23,18 @@ class MainActivity : AppCompatActivity(), OverlaysCallbacks {
 
     val uiLibComponent by lazy { findViewById(R.id.cameraContent) as FrameLayout? }
     val startLibButton by lazy { findViewById(R.id.startLibButton) as Button? }
+    val takePictureButton by lazy { findViewById(R.id.takePictureButton) as FloatingActionButton? }
+    val resultContainer by lazy { findViewById(R.id.resultContainer) as RelativeLayout? }
+    val resultImage by lazy { findViewById(R.id.resultImage) as ImageView? }
+
+    var liveView: LiveView? = null
 
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
         setContentView(R.layout.activity_main)
 
         startLibButton?.setOnClickListener { handlePermissions() }
+        takePictureButton?.setOnClickListener { liveView?.takePicture() }
 
     }
 
@@ -36,8 +42,10 @@ class MainActivity : AppCompatActivity(), OverlaysCallbacks {
         if (ContextCompat.checkSelfPermission(this, Manifest.permission.CAMERA) != PackageManager.PERMISSION_GRANTED) {
             ActivityCompat.requestPermissions(this, arrayOf(Manifest.permission.CAMERA), MY_PERMISSIONS_REQUEST_CAMERA)
         } else {
-            uiLibComponent?.addView(LiveView(this, this))
+            liveView = LiveView(this, this)
+            uiLibComponent?.addView(liveView)
             startLibButton?.visibility = GONE
+            takePictureButton?.visibility = VISIBLE
         }
     }
 
@@ -61,7 +69,10 @@ class MainActivity : AppCompatActivity(), OverlaysCallbacks {
     }
 
     override fun onImageResult(image: Bitmap) {
+        //TODO stop camera to release resources
+        takePictureButton?.visibility = GONE
+        resultContainer?.visibility = VISIBLE
+        resultImage?.setImageBitmap(image)
     }
-
 
 }

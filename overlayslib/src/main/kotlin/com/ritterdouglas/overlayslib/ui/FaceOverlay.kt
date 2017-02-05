@@ -12,7 +12,7 @@ import android.view.MotionEvent
 import android.view.MotionEvent.INVALID_POINTER_ID
 import android.view.ScaleGestureDetector
 import android.graphics.drawable.Drawable
-
+import android.widget.ImageView
 
 
 class FaceOverlay : View{
@@ -137,6 +137,15 @@ class FaceOverlay : View{
         }
     }
 
+    fun viewToBitmap(): Bitmap {
+        val bitmap = Bitmap.createBitmap( width, height, Bitmap.Config.ARGB_8888)
+        bitmap.eraseColor(Color.argb(0, 255, 255, 255))
+        val canvas = Canvas(bitmap)
+        this.draw(canvas)
+
+        return bitmap
+
+    }
 
 
 }
