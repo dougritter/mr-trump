@@ -175,6 +175,8 @@ class LiveView : FrameLayout, Camera.FaceDetectionListener {
         val canvas = Canvas(bitmap)
         cameraPreview?.draw(canvas)
 
+        cameraPreview?.removeViewAt(0)
+
         listener?.onImageResult(bitmap)
     }
 

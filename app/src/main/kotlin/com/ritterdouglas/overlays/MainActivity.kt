@@ -8,6 +8,7 @@ import android.support.v4.app.ActivityCompat
 import android.content.pm.PackageManager
 import android.graphics.Bitmap
 import android.support.design.widget.FloatingActionButton
+import android.support.v7.widget.Toolbar
 import android.util.Log
 import android.view.View.GONE
 import android.view.View.VISIBLE
@@ -15,6 +16,10 @@ import android.widget.*
 import com.ritterdouglas.overlayslib.ui.LiveView
 import com.ritterdouglas.overlayslib.ui.OverlayOptionView
 import com.ritterdouglas.overlayslib.ui.OverlaysCallbacks
+import android.view.WindowManager
+import android.os.Build
+
+
 
 class MainActivity : AppCompatActivity(), OverlaysCallbacks {
     companion object {
@@ -22,6 +27,7 @@ class MainActivity : AppCompatActivity(), OverlaysCallbacks {
         val MY_PERMISSIONS_REQUEST_CAMERA = 100
     }
 
+    val toolbar by lazy { findViewById(R.id.toolbar) as Toolbar? }
     val uiLibComponent by lazy { findViewById(R.id.cameraContent) as FrameLayout? }
     val startLibButton by lazy { findViewById(R.id.startLibButton) as Button? }
     val takePictureButton by lazy { findViewById(R.id.takePictureButton) as FloatingActionButton? }
@@ -35,6 +41,8 @@ class MainActivity : AppCompatActivity(), OverlaysCallbacks {
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
         setContentView(R.layout.activity_main)
+
+        setSupportActionBar(toolbar)
 
         startLibButton?.setOnClickListener { handlePermissions() }
         takePictureButton?.setOnClickListener { liveView?.takePicture() }
@@ -54,6 +62,12 @@ class MainActivity : AppCompatActivity(), OverlaysCallbacks {
         startLibButton?.visibility = GONE
         description?.visibility = GONE
         setupOptionButtons()
+        toolbar?.visibility = GONE
+
+        if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.KITKAT) {
+            window?.setFlags(WindowManager.LayoutParams.FLAG_LAYOUT_NO_LIMITS, WindowManager.LayoutParams.FLAG_LAYOUT_NO_LIMITS)
+        }
+
     }
 
 
