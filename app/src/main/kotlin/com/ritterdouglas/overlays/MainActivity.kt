@@ -19,9 +19,7 @@ import com.ritterdouglas.overlayslib.ui.OverlaysCallbacks
 import android.view.WindowManager
 import android.os.Build
 
-
-
-class MainActivity : AppCompatActivity(), OverlaysCallbacks {
+class MainActivity : AppCompatActivity(), MainView, OverlaysCallbacks {
     companion object {
         val TAG = MainActivity::class.simpleName
         val MY_PERMISSIONS_REQUEST_CAMERA = 100
@@ -37,41 +35,42 @@ class MainActivity : AppCompatActivity(), OverlaysCallbacks {
     val optionsContainer by lazy { findViewById(R.id.overlayButtonsContainer) as LinearLayout? }
 
     var liveView: LiveView? = null
+    var presenter: MainPresenter? = null
 
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
         setContentView(R.layout.activity_main)
-
         setSupportActionBar(toolbar)
+
+        presenter = MainPresenter()
+        presenter?.view = this
 
         startLibButton?.setOnClickListener { handlePermissions() }
         takePictureButton?.setOnClickListener { liveView?.takePicture() }
 
     }
 
-    fun handlePermissions() {
+    override fun handlePermissions() {
         if (ContextCompat.checkSelfPermission(this, Manifest.permission.CAMERA) != PackageManager.PERMISSION_GRANTED) {
             ActivityCompat.requestPermissions(this, arrayOf(Manifest.permission.CAMERA), MY_PERMISSIONS_REQUEST_CAMERA)
-        } else startLib()
+        } else presenter?.startLib()
 
     }
 
-    fun startLib() {
+    override fun initLiveView() {
         liveView = LiveView(this, this)
         uiLibComponent?.addView(liveView)
-        startLibButton?.visibility = GONE
-        description?.visibility = GONE
-        setupOptionButtons()
-        toolbar?.visibility = GONE
-
-        if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.KITKAT) {
-            window?.setFlags(WindowManager.LayoutParams.FLAG_LAYOUT_NO_LIMITS, WindowManager.LayoutParams.FLAG_LAYOUT_NO_LIMITS)
-        }
-
     }
 
+    override fun showStartLibButton(show: Boolean) {
+        startLibButton?.visibility = if (show) VISIBLE else GONE
+    }
 
-    fun setupOptionButtons() {
+    override fun showDescription(show: Boolean) {
+        description?.visibility = if (show) VISIBLE else GONE
+    }
+
+    override fun setupOptions() {
         for ((index, value) in liveView?.getImageChoices()!!.withIndex()) {
             val view = OverlayOptionView(this, value, null)
             view.setOnClickListener { handleOptionClick(index) }
@@ -79,8 +78,34 @@ class MainActivity : AppCompatActivity(), OverlaysCallbacks {
         }
     }
 
+    override fun showToolbar(show: Boolean) {
+        toolbar?.visibility = if (show) VISIBLE else GONE
+    }
+
+    override fun hideStatusBar() {
+        if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.KITKAT) {
+            window?.setFlags(WindowManager.LayoutParams.FLAG_LAYOUT_NO_LIMITS, WindowManager.LayoutParams.FLAG_LAYOUT_NO_LIMITS)
+        }
+    }
+
+    override fun showPictureButton(show: Boolean) {
+        takePictureButton?.visibility = if (show) VISIBLE else GONE
+    }
+
+    override fun showResultContainer(show: Boolean) {
+        resultContainer?.visibility = if (show) VISIBLE else GONE
+    }
+
+    override fun setResultImage(bitmap: Bitmap) {
+        resultImage?.setImageBitmap(bitmap)
+    }
+
+    override fun showOptionsContainer(show: Boolean) {
+        optionsContainer?.visibility = if (show) VISIBLE else GONE
+    }
+
+
     fun handleOptionClick(position: Int) {
-        Log.e(TAG, "position clicked: "+ position)
         liveView?.changedOptionPosition(liveView!!.getOverlayPosition(position))
         for (item in 0..optionsContainer?.childCount!!-1) {
             val view = optionsContainer?.getChildAt(item) as OverlayOptionView
@@ -90,32 +115,21 @@ class MainActivity : AppCompatActivity(), OverlaysCallbacks {
 
 
     override fun onRequestPermissionsResult(requestCode: Int, permissions: Array<String>, grantResults: IntArray) {
-        when (requestCode) {
-            MY_PERMISSIONS_REQUEST_CAMERA -> {
-                if (grantResults.isNotEmpty() && grantResults[0] == PackageManager.PERMISSION_GRANTED) {
-                    handlePermissions()
-                } else Toast.makeText(this, "We didn't receive the permission", Toast.LENGTH_SHORT).show()
-                return
-            }
-        }
+        presenter?.handlePermissionsResult(requestCode, grantResults)
     }
 
     override fun onError(error: String) {
         Log.e(TAG, error)
         Toast.makeText(this, error, Toast.LENGTH_SHORT).show()
-
     }
 
-    override fun onImageResult(image: Bitmap) {
-        takePictureButton?.visibility = GONE
-        resultContainer?.visibility = VISIBLE
-        resultImage?.setImageBitmap(image)
-        optionsContainer?.visibility = GONE
-    }
+    override fun onImageResult(image: Bitmap) { presenter?.imageReceived(image) }
 
-    override fun faceRecognized() {
-        optionsContainer?.visibility = VISIBLE
-        takePictureButton?.visibility = VISIBLE
+    override fun faceRecognized() { presenter?.faceRecognized() }
+
+    override fun onDestroy() {
+        presenter?.destroy()
+        super.onDestroy()
     }
 
 

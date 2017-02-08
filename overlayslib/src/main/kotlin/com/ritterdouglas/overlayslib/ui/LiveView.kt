@@ -30,17 +30,17 @@ class LiveView : FrameLayout, Camera.FaceDetectionListener {
     var atLeastOneFaceRecognized = false
 
     constructor(context: Context, listener: OverlaysCallbacks) : super(context) {
-        init(context, null, 0)
+        init(context)
         this.listener = listener
     }
 
-    constructor(context: Context) : super(context) { init(context, null, 0) }
+    constructor(context: Context) : super(context) { init(context) }
 
-    constructor(context: Context, attrs: AttributeSet) : super(context, attrs) { init(context, attrs, 0) }
+    constructor(context: Context, attrs: AttributeSet) : super(context, attrs) { init(context) }
 
-    constructor(context: Context, attrs: AttributeSet, defStyle: Int) : super(context, attrs, defStyle) { init(context, attrs, defStyle) }
+    constructor(context: Context, attrs: AttributeSet, defStyle: Int) : super(context, attrs, defStyle) { init(context) }
 
-    private fun init(context: Context, attrs: AttributeSet?, defStyle: Int) {
+    private fun init(context: Context) {
         View.inflate(context, R.layout.live_view, this)
 
         cameraPreview = findViewById(R.id.cameraPreview) as FrameLayout?
