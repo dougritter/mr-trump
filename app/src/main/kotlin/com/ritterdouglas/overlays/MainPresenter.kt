@@ -5,6 +5,8 @@ import android.graphics.Bitmap
 
 class MainPresenter {
 
+    companion object { val PERMISSIONS_ERROR = "We didn't receive the permission" }
+
     var view: MainView? = null
 
     fun startLib() {
@@ -33,7 +35,7 @@ class MainPresenter {
             MainActivity.MY_PERMISSIONS_REQUEST_CAMERA -> {
                 if (grantResults.isNotEmpty() && grantResults[0] == PackageManager.PERMISSION_GRANTED) {
                     view?.handlePermissions()
-                } else view?.onError("We didn't receive the permission")
+                } else view?.onError(PERMISSIONS_ERROR)
                 return
             }
         }
